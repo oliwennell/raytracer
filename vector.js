@@ -8,7 +8,15 @@ Vector = function(x, y, z) {
 		return new Vector(this.x+other.x, this.y+other.y, this.z+other.z);
 	};
 
-	this.mul = function(scalar) {
+	this.sub = function(other) {
+		return new Vector(this.x-other.x, this.y-other.y, this.z-other.z);
+	};
+
+	this.mul = function(other) {
+		return new Vector(this.x*other.x, this.y*other.y, this.z*other.z);
+	};
+
+	this.mulScalar = function(scalar) {
 		return new Vector(this.x*scalar, this.y*scalar, this.z*scalar);
 	};
 
@@ -25,6 +33,10 @@ Vector = function(x, y, z) {
 	};
 
 	this.norm = function() {
-		return this.mul(1 / Math.sqrt(this.dot(this)));
+		return this.mulScalar(1 / Math.sqrt(this.dot(this)));
+	};
+
+	this.length = function() {
+		return Math.sqrt(this.x*this.x + this.y*this.y + this.z*this.z);
 	};
 };
