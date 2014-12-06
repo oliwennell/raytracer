@@ -54,17 +54,20 @@ var traceRay = function(ray, sphere) {
 };
 
 var spheres = [
+	{ centre: new Vector(-10,0,-10), radius: 5 },
+	{ centre: new Vector(10,0,-10), radius: 5 },
+	{ centre: new Vector(-10,10,-10), radius: 5 },
+	{ centre: new Vector(10,10,-10), radius: 5 },
+	{ centre: new Vector(-10,-10,-10), radius: 5 },
+	{ centre: new Vector(10,-10,-10), radius: 5 },
+	{ centre: new Vector(0,-10,-10), radius: 5 },
 	{ centre: new Vector(0,0,-10), radius: 5 },
-	{ centre: new Vector(0,0,10), radius: 5 },
-	{ centre: new Vector(-10,0,0), radius: 5 },
-	{ centre: new Vector(10,0,0), radius: 5 },
-	{ centre: new Vector(0,-10,0), radius: 5 },
-	{ centre: new Vector(0,10,0), radius: 5 }
+	{ centre: new Vector(0,10,-10), radius: 5 },
 ];
 
 var light = {
-	centre: new Vector(20, 0, 0),
-	radius: 30
+	centre: new Vector(0,0,20),
+	radius: 50
 };
 
 var sample = function(ray) {
@@ -74,14 +77,20 @@ var sample = function(ray) {
 		var traceResult = traceRay(ray, sphere);
 		if (traceResult.intersection) {
 			
-			//var dirToLight = light.sub(traceResult.intersection).norm();
-			var lightDist = light.centre.sub(traceResult.intersection).length();
 			var brightness = 0;
-			if (lightDist <= light.radius)
-				brightness = lightDist / light.radius;
+			
+			var lightDist = light.centre.sub(traceResult.intersection).length();
+			if (lightDist <= light.radius) {
+
+				var lightDir = light.centre.sub(traceResult.intersection).norm();
+				var surfaceNorm = traceResult.intersection.sub(sphere.centre).norm();
+				brightness += lightDir.dot(surfaceNorm);	
+
+				brightness *= 1 - (lightDist / light.radius);
+			}
 
 			return new Vector(brightness,0,0);
 		}
 	}
-	return new Vector(0,1,0);
+	return new Vector(0,0,0);
 }
