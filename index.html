@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    
+  </head>
+
+  <body>
+    <canvas width="200" height="200">
+    </canvas>
+
+
+    <script src="vector.js"></script>
+    <script src="raytracer.js"></script>
+    <script type="text/javascript">
+      
+      var cameraDir = new Vector(0, 0, -1).norm();
+      var cameraUp = new Vector(0, 1, 0).cross(cameraDir).norm();
+      var cameraRight = cameraDir.cross(cameraUp).norm();
+      var offsetToFocalPlane = cameraUp.add(cameraRight).add(cameraDir);
+      //var rayOrigin = new Vector(0,0,0);
+
+      var canvas = document.getElementsByTagName('canvas')[0];
+      var context = canvas.getContext('2d');
+      context.beginPath();
+      
+      var size = 200;
+      var halfSize = size/2;
+
+      for (var y=0; y<size; ++y) {
+        for (var x=0; x<size; ++x) {
+
+          var rayDirection = new Vector(0,0,-1);
+          var rayOrigin = new Vector((x-halfSize)*0.1, (y-halfSize)*0.1, -1);
+
+          var pixel = sample({ origin: rayOrigin, direction: rayDirection });
+
+          var toByte = function(scalar) {
+            return Math.floor(scalar*255);
+          }
+          context.fillStyle = 
+            "rgb(" 
+              + toByte(pixel.x) + ","
+              + toByte(pixel.y) + "," 
+              + toByte(pixel.z)
+            + ")"
+          context.fillRect(x, y, 1, 1);
+        }
+      }
+
+    </script>
+  </body>
+
+</html>
