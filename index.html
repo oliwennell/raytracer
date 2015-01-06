@@ -5,7 +5,7 @@
   </head>
 
   <body>
-    <canvas width="400" height="400">
+    <canvas width="300" height="300">
     </canvas>
 
 
@@ -16,26 +16,22 @@
       var cameraDir = new Vector(0, 0, -1).norm();
       var cameraUp = new Vector(0, 1, 0).cross(cameraDir).norm();
       var cameraRight = cameraDir.cross(cameraUp).norm();
-      var offsetToFocalPlane = cameraUp.add(cameraRight).add(cameraDir);
-      //var rayOrigin = new Vector(0,0,0);
-
+      
       var canvas = document.getElementsByTagName('canvas')[0];
       var context = canvas.getContext('2d');
+      
+      var halfWidth = canvas.width/2;
+      var halfHeight = canvas.height/2;
+
+      var rayOrigin = new Vector(0,0,halfWidth*-1);
+
       context.beginPath();
       
-      var size = 400;
-      var halfSize = size/2;
-      var scale = 0.1;
-
-      var rayOrigin = new Vector(0,0,-1);
-
-      for (var y=0; y<size; ++y) {
-        for (var x=0; x<size; ++x) {
-
-          //var rayDirection = new Vector(0,0,-1);
-          //var rayOrigin = new Vector((x-halfSize)*0.1, (y-halfSize)*0.1, -1);
-          var pixelInWorldSpace = new Vector((x-halfSize)*scale, (y-halfSize)*scale, 0);
-          var rayDirection = rayOrigin.sub(pixelInWorldSpace).norm();
+      for (var x=0; x<canvas.width; ++x) {      
+        for (var y=0; y<canvas.height; ++y) {
+      
+          var v = new Vector(x-halfWidth, y-halfHeight, 0);
+          var rayDirection = v.sub(rayOrigin).norm();
 
           var pixel = sample({ origin: rayOrigin, direction: rayDirection });
 

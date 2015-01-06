@@ -1,4 +1,6 @@
 
+// todo: depth sorting
+
 var traceRay = function(ray, sphere) {
 
 	var projectPointOntoRay = function(point, ray) {
@@ -65,20 +67,17 @@ var spheres = [
 	{ centre: new Vector(0,0,-17), radius: 5 },
 	{ centre: new Vector(0,10,-18), radius: 5 },
 	*/
-	{ centre: new Vector(-210,-100,-150), radius: 100, color: new Vector(1,0,0), isReflective: false },
-	
-	{ centre: new Vector(0,-100,-150), radius: 100, color: new Vector(0.1,0.1,0.1), isReflective: false },
-	
-	{ centre: new Vector(210,-100,-150), radius: 100, color: new Vector(0,0,1), isReflective: false },
-	{ centre: new Vector(0,110,-150), radius: 100, color: new Vector(0,1,0), isReflective: false },
+
+	{ centre: new Vector(-80,0,-40), radius: 40, color: new Vector(1,0,0), isReflective: false },
+	{ centre: new Vector(0,0,0), radius: 40, color: new Vector(0.2,0.2,0.2), isReflective: true },
+	{ centre: new Vector(80,0,-20), radius: 40, color: new Vector(0,0,1), isReflective: false },
 
 ];
 
 var lights = [
-	{ centre: new Vector(0,110,0), radius: 500 }
+	{ centre: new Vector(-20,-80,-30), radius: 220 },
+	{ centre: new Vector(40,80,20), radius: 200 }
 ];
-
-// todo: depth sorting
 
 var reflectionCount = 0;
 
@@ -125,14 +124,11 @@ var sample = function(ray) {
 			if (reflection)
 				result = result.add(reflection);
 
-			//result.x = Math.min(Math.max(result.x, 0), 1);
-			//result.y = Math.min(Math.max(result.y, 0), 1);
-			//result.z = Math.min(Math.max(result.z, 0), 1);
 			return result;
 		}
 	}
 
 	return ray.direction.y > 0 ? 
-		new Vector(0.5,0.5,1).mulScalar(ray.direction.y) : 
-		new Vector(0,0,0);
+		new Vector(0,105/255,14/255).mulScalar(ray.direction.y) : 
+		new Vector(42/255,76/255,81/255).mulScalar(ray.direction.y*-1);
 }
