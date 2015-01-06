@@ -2,7 +2,6 @@
 var traceRay = function(ray, sphere) {
 
 	var projectPointOntoRay = function(point, ray) {
-		// projection = point + point * (point - ray.origin) * ray.direction
 		var u = point.sub(ray.origin);	
 		var rdl = ray.direction.length();
 		var puv = ray.direction.mulScalar(ray.direction.dot(u) / rdl);
@@ -20,7 +19,9 @@ var traceRay = function(ray, sphere) {
 			return { intersection: null };
 		}
 		else if (vpcLen == sphere.radius) {
+			// ray origin is on sphere
 			return { intersection: ray.origin };
+			//return { intersection: null };
 		}
 		else {
 			// ray origin is inside sphere. TODO:
@@ -54,43 +55,84 @@ var traceRay = function(ray, sphere) {
 };
 
 var spheres = [
-	{ centre: new Vector(-10,0,-10), radius: 5 },
-	{ centre: new Vector(10,0,-10), radius: 5 },
-	{ centre: new Vector(-10,10,-10), radius: 5 },
-	{ centre: new Vector(10,10,-10), radius: 5 },
-	{ centre: new Vector(-10,-10,-10), radius: 5 },
-	{ centre: new Vector(10,-10,-10), radius: 5 },
-	{ centre: new Vector(0,-10,-10), radius: 5 },
-	{ centre: new Vector(0,0,-10), radius: 5 },
-	{ centre: new Vector(0,10,-10), radius: 5 },
+/*	{ centre: new Vector(-10,0,-10), radius: 5 },
+	{ centre: new Vector(10,0,-11), radius: 5 },
+	{ centre: new Vector(-10,10,-12), radius: 5 },
+	{ centre: new Vector(10,10,-13), radius: 5 },
+	{ centre: new Vector(-10,-10,-14), radius: 5 },
+	{ centre: new Vector(10,-10,-15), radius: 5 },
+	{ centre: new Vector(0,-10,-16), radius: 5 },
+	{ centre: new Vector(0,0,-17), radius: 5 },
+	{ centre: new Vector(0,10,-18), radius: 5 },
+	*/
+	{ centre: new Vector(-210,-100,-150), radius: 100, color: new Vector(1,0,0), isReflective: false },
+	
+	{ centre: new Vector(0,-100,-150), radius: 100, color: new Vector(0.1,0.1,0.1), isReflective: false },
+	
+	{ centre: new Vector(210,-100,-150), radius: 100, color: new Vector(0,0,1), isReflective: false },
+	{ centre: new Vector(0,110,-150), radius: 100, color: new Vector(0,1,0), isReflective: false },
+
 ];
 
-var light = {
-	centre: new Vector(0,0,20),
-	radius: 50
-};
+var lights = [
+	{ centre: new Vector(0,110,0), radius: 500 }
+];
+
+// todo: depth sorting
+
+var reflectionCount = 0;
 
 var sample = function(ray) {
+	
 	for (var sphereIndex = 0; sphereIndex < spheres.length; ++sphereIndex) {
 		var sphere = spheres[sphereIndex];
 
 		var traceResult = traceRay(ray, sphere);
 		if (traceResult.intersection) {
 			
+			var reflection = null;
+			if (sphere.isReflective && reflectionCount < 5) {
+				reflectionCount++;
+
+				var surfaceNorm = traceResult.intersection.sub(sphere.centre).norm();					
+				reflection = sample({ origin: traceResult.intersection.add(surfaceNorm), direction: surfaceNorm });
+
+				reflectionCount--;
+			}
+			
 			var brightness = 0;
 			
-			var lightDist = light.centre.sub(traceResult.intersection).length();
-			if (lightDist <= light.radius) {
+			for (var lightIndex = 0; lightIndex < lights.length; ++lightIndex) {
+				var light = lights[lightIndex];
+				var lightDist = light.centre.sub(traceResult.intersection).length();
+				if (lightDist <= light.radius) {
 
-				var lightDir = light.centre.sub(traceResult.intersection).norm();
-				var surfaceNorm = traceResult.intersection.sub(sphere.centre).norm();
-				brightness += lightDir.dot(surfaceNorm);	
+					var surfaceNorm = traceResult.intersection.sub(sphere.centre).norm();
+			
+					var lightDir = light.centre.sub(traceResult.intersection).norm();
+					var b = lightDir.dot(surfaceNorm);	
+					b *= 1 - (lightDist / light.radius);
 
-				brightness *= 1 - (lightDist / light.radius);
+					brightness += b;
+				}
 			}
 
-			return new Vector(brightness,0,0);
+			if (brightness > 1)
+				brightness = 1;
+
+			var result = sphere.color.mulScalar(brightness);
+
+			if (reflection)
+				result = result.add(reflection);
+
+			//result.x = Math.min(Math.max(result.x, 0), 1);
+			//result.y = Math.min(Math.max(result.y, 0), 1);
+			//result.z = Math.min(Math.max(result.z, 0), 1);
+			return result;
 		}
 	}
-	return new Vector(0,0,0);
+
+	return ray.direction.y > 0 ? 
+		new Vector(0.5,0.5,1).mulScalar(ray.direction.y) : 
+		new Vector(0,0,0);
 }
