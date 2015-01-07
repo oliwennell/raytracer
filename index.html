@@ -24,13 +24,14 @@
       var halfHeight = canvas.height/2;
 
       var rayOrigin = new Vector(0,0,halfWidth*-1);
+      var currentScanLine=0;
 
-      context.beginPath();
+      var renderScanLine = function() {
+        context.beginPath();
       
-      for (var x=0; x<canvas.width; ++x) {      
-        for (var y=0; y<canvas.height; ++y) {
-      
-          var v = new Vector(x-halfWidth, y-halfHeight, 0);
+        for (var x=0; x<canvas.width; ++x) {      
+
+          var v = new Vector(x-halfWidth, currentScanLine-halfHeight, 0);
           var rayDirection = v.sub(rayOrigin).norm();
 
           var pixel = sample({ origin: rayOrigin, direction: rayDirection });
@@ -44,9 +45,14 @@
               + toByte(pixel.y) + "," 
               + toByte(pixel.z)
             + ")"
-          context.fillRect(x, y, 1, 1);
+          context.fillRect(x, currentScanLine, 1, 1);
         }
-      }
+
+        if (++currentScanLine < canvas.height)
+          setTimeout(renderScanLine, 0);
+      };
+
+      renderScanLine();
 
     </script>
   </body>
