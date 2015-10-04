@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Raytracer</title>
+    <style>
+        #render-canvas {
+            padding: 30px 0;
+            display: block;
+            margin: auto;
+            clear: both;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="render-canvas" width="450" height="450">
+    </canvas>
+  
+    <script type="text/javascript" src="https://rawgithub.com/oliwennell/raytracer/master/vector.js"></script>
+    <script type="text/javascript" src="https://rawgithub.com/oliwennell/raytracer/master/raytracer.js"></script>
+    <script type="text/javascript">
+      
+      var cameraDir = new Vector(0, 0, -1).norm();
+      var cameraUp = new Vector(0, 1, 0).cross(cameraDir).norm();
+      var cameraRight = cameraDir.cross(cameraUp).norm();
+      
+      var canvas = document.getElementsByTagName('canvas')[0];
+      var context = canvas.getContext('2d');
+      
+      var halfWidth = canvas.width/2;
+      var halfHeight = canvas.height/2;
+      var rayOrigin = new Vector(0,0,halfWidth*-1);
+      var currentScanLine=0;
+      var renderScanLine = function() {
+        context.beginPath();
+      
+        for (var x=0; x<canvas.width; ++x) {      
+          var v = new Vector(x-halfWidth, currentScanLine-halfHeight, 0);
+          var rayDirection = v.sub(rayOrigin).norm();
+          var pixel = sample({ origin: rayOrigin, direction: rayDirection });
+          var toByte = function(scalar) {
+            return Math.floor(scalar*255);
+          }
+          context.fillStyle = 
+            "rgb(" 
+              + toByte(pixel.x) + ","
+              + toByte(pixel.y) + "," 
+              + toByte(pixel.z)
+            + ")"
+          context.fillRect(x, currentScanLine, 1, 1);
+        }
+        if (++currentScanLine < canvas.height)
+          setTimeout(renderScanLine, 0);
+      };
+      renderScanLine();
+    </script>
+    
+</body>
+</html>
